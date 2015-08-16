@@ -1,7 +1,10 @@
 package cap
 
-import "encoding/xml"
-import "strings"
+import (
+	"encoding/xml"
+	"net/http"
+	"strings"
+)
 
 // NWSAtomFeed represents a AtomFeed of CAP alerts from the National Weather Service
 type NWSAtomFeed struct {
@@ -51,6 +54,8 @@ type NWSAtomEntry struct {
 }
 
 // NWSAtomGeocode describes the special version of Geocode elements used by the NWS Atom feed
+//
+// See note in GetValues for more information
 type NWSAtomGeocode struct {
 	XMLName xml.Name `xml:"urn:oasis:names:tc:emergency:cap:1.1 geocode,omitempty"`
 
@@ -65,6 +70,14 @@ type Author struct {
 }
 
 // GetValues returns back an array of values for the Geocode element with the same name
+//
+// Unfortunately, the NWS Atom format deviates from the normal CAP Geocode element
+// and does not create a new Geocode element for each name / value pair.
+// Instead, multiple name / value pairs are listed in order inside a single
+// geocode tag. As a result, we store both a list of names and list of values
+// that have been unmarshalled from the XML and retrieve them by searching
+// the Names list and returning the corresponding item from the Values list
+// at the same index
 func (g *NWSAtomGeocode) GetValues(name string) []string {
 	for index, value := range g.Names {
 		if value == name {
@@ -78,4 +91,9 @@ func (g *NWSAtomGeocode) GetValues(name string) []string {
 // Parameter returns back the value for the first parameter with the specified name
 func (ae *NWSAtomEntry) Parameter(name string) string {
 	return search(&ae.Parameters, name)
+}
+
+// Follow retrieves the resource that the link's href attribute points to
+func (l *Link) Follow() (response *http.Response, err error) {
+	return http.Get(l.Href)
 }
