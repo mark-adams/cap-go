@@ -24,7 +24,8 @@ type Alert struct {
 
 // Info describes an anticipated or actual event
 type Info struct {
-	XMLName          xml.Name     `xml:"info"`
+	XMLName xml.Name `xml:"info"`
+
 	Language         string       `xml:"language,omitempty"`
 	EventCategory    string       `xml:"category"`
 	EventType        string       `xml:"event"`
@@ -50,6 +51,8 @@ type Info struct {
 
 // Resource provides an optional reference to additional information related to Info
 type Resource struct {
+	XMLName xml.Name `xml:"resource"`
+
 	Description      string `xml:"resourceDesc"`
 	MIMEType         string `xml:"mimeType,omitempty"`
 	FileSize         string `xml:"size,omitempty"`
@@ -60,6 +63,8 @@ type Resource struct {
 
 // Area describes a geographic area to which the Info segment applies
 type Area struct {
+	XMLName xml.Name `xml:"area"`
+
 	Description string `xml:"areaDesc"`
 	Polygon     string `xml:"polygon,omitempty"`
 	Circle      string `xml:"circle,omitempty"`
