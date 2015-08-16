@@ -1,5 +1,6 @@
 # cap-go
 [![Build Status](https://travis-ci.org/mark-adams/cap-go.svg?branch=master)](https://travis-ci.org/mark-adams/cap-go)
+[![Coverage Status](https://coveralls.io/repos/mark-adams/cap-go/badge.svg?branch=master&service=github)](https://coveralls.io/github/mark-adams/cap-go?branch=master)
 
 A Go library for interacting with Common Alerting Protocol messages
 
