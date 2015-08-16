@@ -230,6 +230,25 @@ func TestUnmarshalNWSAtomFeedEntryParameterHasProperValues(t *testing.T) {
 		"VTEC parameter does not match!")
 }
 
+func TestNWSAtomGeocodeGetValuesReturnsEmptyArrIfNotFound(t *testing.T) {
+	var geocode NWSAtomGeocode
+
+	found := geocode.GetValues("not-a-real-key")
+
+	assertEqual(t, len(found), 0, "No items should be found")
+}
+
+func TestLinkFollowReturnsErrorForInvalidURL(t *testing.T) {
+	link := Link{Href: "abcdef"}
+
+	_, err := link.Follow()
+
+	assertEqual(t,
+		"Get abcdef: unsupported protocol scheme \"\"",
+		err.Error(),
+		"Incorrect error was returned")
+}
+
 func TestHandleHttpResponseReturnsStartingErr(t *testing.T) {
 	existingError := errors.New("Prexisting error!")
 
