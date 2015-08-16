@@ -4,7 +4,7 @@ import "encoding/xml"
 
 // Alert provides basic information about the current message: its purpose, its source and its status
 type Alert struct {
-	XMLName xml.Name `xml:"urn:oasis:names:tc:emergency:cap:1.1 alert"`
+	XMLName xml.Name `xml:"urn:oasis:names:tc:emergency:cap:1.2 alert"`
 
 	MessageID     string   `xml:"identifier"`
 	SenderID      string   `xml:"sender"`
@@ -20,6 +20,12 @@ type Alert struct {
 	ReferenceIDs  []string `xml:"references,omitempty"`
 	IncidentIDs   []string `xml:"incidents,omitempty"`
 	Infos         []Info   `xml:"info,omitempty"`
+}
+
+// Alert11 is the same as Alert but using the CAP 1.1 namespace
+type Alert11 struct {
+	Alert
+	XMLName xml.Name `xml:"urn:oasis:names:tc:emergency:cap:1.1 alert"`
 }
 
 // Info describes an anticipated or actual event

@@ -13,46 +13,46 @@ func TestUnmarshalAlertHasProperValues(t *testing.T) {
 		t.Error(err)
 	}
 
-	var testAlert Alert
-	xml.Unmarshal(xmlData, &testAlert)
+	var alert Alert11
+	xml.Unmarshal(xmlData, &alert)
 
 	assertEqual(t,
-		testAlert.MessageID,
+		alert.MessageID,
 		"NOAA-NWS-ALERTS-AR1253BA3B00A4.FloodWarning.1253BA3D4A94AR.LZKFLSLZK.342064b5a5aafb8265dfc3707d6a3b09",
 		"MessageID does not match!")
 
 	assertEqual(t,
-		testAlert.SenderID,
+		alert.SenderID,
 		"w-nws.webmaster@noaa.gov",
 		"SenderID does not match!")
 
 	assertEqual(t,
-		testAlert.SentDate,
+		alert.SentDate,
 		"2015-08-15T20:45:00-05:00",
 		"SenderDate does not match!")
 
 	assertEqual(t,
-		testAlert.MessageStatus,
+		alert.MessageStatus,
 		"Actual",
 		"MessageStatus does not match!")
 
 	assertEqual(t,
-		testAlert.MessageType,
+		alert.MessageType,
 		"Alert",
 		"MessageType does not match!")
 
 	assertEqual(t,
-		testAlert.Scope,
+		alert.Scope,
 		"Public",
 		"Scope does not match!")
 
 	assertEqual(t,
-		testAlert.Note,
+		alert.Note,
 		"Alert for Jackson; Woodruff (Arkansas) Issued by the National Weather Service",
 		"Note does not match!")
 
 	assertEqual(t,
-		len(testAlert.Infos),
+		len(alert.Infos),
 		1,
 		"One <info> should be present")
 }
@@ -64,10 +64,10 @@ func TestUnmarshalAlertInfoHasProperValues(t *testing.T) {
 		t.Error(err)
 	}
 
-	var testAlert Alert
-	xml.Unmarshal(xmlData, &testAlert)
+	var alert Alert11
+	xml.Unmarshal(xmlData, &alert)
 
-	var info = testAlert.Infos[0]
+	var info = alert.Infos[0]
 	assertEqual(t,
 		info.EventCategory,
 		"Met",
@@ -146,10 +146,10 @@ func TestUnmarshalAlertInfoParameterHasProperValues(t *testing.T) {
 		t.Error(err)
 	}
 
-	var testAlert Alert
-	xml.Unmarshal(xmlData, &testAlert)
+	var alert Alert11
+	xml.Unmarshal(xmlData, &alert)
 
-	var info = testAlert.Infos[0]
+	var info = alert.Infos[0]
 
 	assertEqual(t,
 		info.Parameter("WMOHEADER"),
@@ -189,10 +189,10 @@ func TestUnmarshalAlertInfoAreaHasProperValues(t *testing.T) {
 		t.Error(err)
 	}
 
-	var testAlert Alert
-	xml.Unmarshal(xmlData, &testAlert)
+	var alert Alert11
+	xml.Unmarshal(xmlData, &alert)
 
-	var info = testAlert.Infos[0]
+	var info = alert.Infos[0]
 	var area = info.Areas[0]
 
 	assertEqual(t,
