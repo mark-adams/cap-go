@@ -108,11 +108,7 @@ func (l *Link) Follow() (*http.Response, error) {
 
 // FollowAlert retrieves the Alert that the link's href attribute points to
 func (l *Link) FollowAlert() (*Alert11, error) {
-	body, err := handleHTTPResponse(http.Get(l.Href))
-
-	if err != nil {
-		return nil, err
-	}
+	body, err := handleHTTPResponse(l.Follow())
 
 	if err != nil {
 		return nil, err
@@ -129,7 +125,7 @@ func (l *Link) FollowAlert() (*Alert11, error) {
 }
 
 // GetNWSAtomFeed retrieves the main National Weather Service CAP v1.1 ATOM feed
-func GetNWSAtomFeed() (feed *NWSAtomFeed, err error) {
+func GetNWSAtomFeed() (*NWSAtomFeed, error) {
 	body, err := handleHTTPResponse(http.Get(NwsNationalAtomFeedURL))
 
 	if err != nil {
