@@ -36,15 +36,15 @@ type Info struct {
 	Audience         string       `xml:"audience,omitempty"`
 	EventCode        []NamedValue `xml:"eventCode,omitempty"`
 	EffectiveDate    string       `xml:"effective,omitempty"`
-	ExpirationDate   string       `xml:"onset,omitempty"`
-	OnsetDate        string       `xml:"expires,omitempty"`
+	ExpiresDate      string       `xml:"expires,omitempty"`
+	OnsetDate        string       `xml:"onset,omitempty"`
 	SenderName       string       `xml:"senderName,omitempty"`
 	Headline         string       `xml:"headline,omitempty"`
 	EventDescription string       `xml:"description,omitempty"`
-	Instructions     string       `xml:"instruction,omitempty"`
+	Instruction      string       `xml:"instruction,omitempty"`
 	InformationURL   string       `xml:"web,omitempty"`
 	ContactInfo      string       `xml:"contact,omitempty"`
-	Parameter        []NamedValue `xml:"parameter,omitempty"`
+	Parameters       []NamedValue `xml:"parameter,omitempty"`
 	Areas            []Area       `xml:"area,omitempty"`
 	Resources        []Resource   `xml:"resource,omitempty"`
 }
@@ -65,16 +65,67 @@ type Resource struct {
 type Area struct {
 	XMLName xml.Name `xml:"area"`
 
-	Description string `xml:"areaDesc"`
-	Polygon     string `xml:"polygon,omitempty"`
-	Circle      string `xml:"circle,omitempty"`
-	Geocode     string `xml:"geocode,omitempty"`
-	Altitude    string `xml:"altitude,omitempty"`
-	Ceiling     string `xml:"ceiling,omitempty"`
+	Description string       `xml:"areaDesc"`
+	Polygon     string       `xml:"polygon,omitempty"`
+	Circle      string       `xml:"circle,omitempty"`
+	Geocodes    []NamedValue `xml:"geocode,omitempty"`
+	Altitude    string       `xml:"altitude,omitempty"`
+	Ceiling     string       `xml:"ceiling,omitempty"`
 }
 
 // NamedValue contains a name and a value associated with that name
 type NamedValue struct {
 	ValueName string `xml:"valueName"`
 	Value     string `xml:"value"`
+}
+
+// search checks a slice of NamedValues for the first value with a specific name
+func search(nva *[]NamedValue, name string) string {
+	for _, element := range *nva {
+		if element.ValueName == name {
+			return element.Value
+		}
+	}
+
+	return ""
+}
+
+// searchAll checks a slice of NamedValues for all values with the specified name
+func searchAll(nva *[]NamedValue, name string) []string {
+	var found = make([]string, 0, len(*nva))
+
+	for _, element := range *nva {
+		if element.ValueName == name {
+			found = append(found, element.Value)
+		}
+	}
+
+	return found
+}
+
+// Parameter returns back the value for the first parameter with the specified name
+func (info *Info) Parameter(name string) string {
+	return search(&info.Parameters, name)
+}
+
+// AddParameter adds a Parameter with the specified name and value
+func (info *Info) AddParameter(name string, value string) {
+	param := NamedValue{ValueName: name, Value: value}
+	info.Parameters = append(info.Parameters, param)
+}
+
+// Geocode returns back the value for the first Geocode value with the specified name
+func (a *Area) Geocode(name string) string {
+	return search(&a.Geocodes, name)
+}
+
+// GeocodeAll returns back the Geocode values with the specified name
+func (a *Area) GeocodeAll(name string) []string {
+	return searchAll(&a.Geocodes, name)
+}
+
+// AddGeocode adds a Geocode with the specified name and value
+func (a *Area) AddGeocode(name string, value string) {
+	geocode := NamedValue{ValueName: name, Value: value}
+	a.Geocodes = append(a.Geocodes, geocode)
 }
