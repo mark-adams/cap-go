@@ -2,7 +2,9 @@ package cap
 
 import (
 	"encoding/xml"
+	"errors"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"testing"
 )
@@ -226,6 +228,48 @@ func TestUnmarshalNWSAtomFeedEntryParameterHasProperValues(t *testing.T) {
 		entry.Parameter("VTEC"),
 		"/O.CON.KLZK.FL.W.0108.000000T0000Z-000000T0000Z/\n",
 		"VTEC parameter does not match!")
+}
+
+func TestHandleHttpResponseReturnsStartingErr(t *testing.T) {
+	existingError := errors.New("Prexisting error!")
+
+	_, err := handleHTTPResponse(nil, existingError)
+
+	assertEqual(t, existingError, err, "The returned error was not the expected error")
+}
+
+func TestHandleHttpResponseReturnsErrOnNon200StatusCode(t *testing.T) {
+	var response http.Response
+
+	response.StatusCode = 400
+	_, err := handleHTTPResponse(&response, nil)
+
+	assertEqual(t, "Non-200 status code received from server: 400", err.Error(), "The returned error was not the expected error")
+}
+
+func TestHandleHttpResponseReturnsErrOnZeroContentLength(t *testing.T) {
+	var response http.Response
+
+	response.StatusCode = 200
+	response.ContentLength = 0
+
+	_, err := handleHTTPResponse(&response, nil)
+
+	assertEqual(t, "No content was returned", err.Error(), "The returned error was not the expected error")
+}
+
+func TestHandleHttpResponseReturnsErrOnContentLengthTooLarge(t *testing.T) {
+	var response http.Response
+
+	response.StatusCode = 200
+	response.ContentLength = MaxFeedSize + 1
+
+	_, err := handleHTTPResponse(&response, nil)
+
+	assertStartsWith(t,
+		err.Error(),
+		"Feed exceeds maximum size of",
+		"The returned error was not the expected error")
 }
 
 // Integration test! Requires Internet access!

@@ -148,7 +148,7 @@ func handleHTTPResponse(response *http.Response, err error) ([]byte, error) {
 	}
 
 	if response.StatusCode != 200 {
-		return nil, fmt.Errorf("Non-200 status code received from server: %d", 200)
+		return nil, fmt.Errorf("Non-200 status code received from server: %d", response.StatusCode)
 	}
 
 	if response.ContentLength == 0 {
