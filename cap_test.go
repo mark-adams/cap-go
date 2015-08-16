@@ -229,5 +229,4 @@ func TestUnmarshalAlertInfoAreaHasProperValues(t *testing.T) {
 		"ARC147",
 		area.GeocodeAll("UGC"),
 		"Value not found in Geocode[UGC]!")
-
 }

@@ -2,9 +2,53 @@ package cap
 
 import (
 	"encoding/xml"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 )
+
+// NwsNationalAtomFeedURL is the URL for the NWS National Atom feed
+const NwsNationalAtomFeedURL string = "https://alerts.weather.gov/cap/us.php?x=1"
+
+// MaxFeedSize is the maximum size for a downloaded feed
+const MaxFeedSize int64 = 1024 * 1024 * 5
+
+// GetNWSAtomFeed retrieves the main National Weather Service CAP v1.1 ATOM feed
+func GetNWSAtomFeed() (feed *NWSAtomFeed, err error) {
+	response, err := http.Get(NwsNationalAtomFeedURL)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if response.StatusCode != 200 {
+		return nil, fmt.Errorf("Non-200 status code received from server: %d", 200)
+	}
+
+	if response.ContentLength == 0 {
+		return nil, fmt.Errorf("No content was returned")
+	}
+
+	if response.ContentLength > MaxFeedSize {
+		return nil, fmt.Errorf("Feed exceeds maximum size of %d bytes", MaxFeedSize)
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var downloadedFeed NWSAtomFeed
+	err = xml.Unmarshal(body, &downloadedFeed)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &downloadedFeed, nil
+}
 
 // NWSAtomFeed represents a AtomFeed of CAP alerts from the National Weather Service
 type NWSAtomFeed struct {
@@ -94,6 +138,42 @@ func (ae *NWSAtomEntry) Parameter(name string) string {
 }
 
 // Follow retrieves the resource that the link's href attribute points to
-func (l *Link) Follow() (response *http.Response, err error) {
+func (l *Link) Follow() (*http.Response, error) {
 	return http.Get(l.Href)
+}
+
+// FollowAlert retrieves the Alert that the link's href attribute points to
+func (l *Link) FollowAlert() (*Alert11, error) {
+	response, err := http.Get(l.Href)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if response.StatusCode != 200 {
+		return nil, fmt.Errorf("Non-200 status code received from server: %d", 200)
+	}
+
+	if response.ContentLength == 0 {
+		return nil, fmt.Errorf("No content was returned")
+	}
+
+	if response.ContentLength > MaxFeedSize {
+		return nil, fmt.Errorf("Feed exceeds maximum size of %d bytes", MaxFeedSize)
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var alert Alert11
+	err = xml.Unmarshal(body, &alert)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &alert, nil
 }

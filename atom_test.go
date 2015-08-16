@@ -3,18 +3,29 @@ package cap
 import (
 	"encoding/xml"
 	"io/ioutil"
+	"net/url"
 	"testing"
 )
 
-func TestUnmarshalNWSAtomFeedHasProperValues(t *testing.T) {
+func getNwsAtomFeedExample() (*NWSAtomFeed, error) {
 	xmlData, err := ioutil.ReadFile("examples/nws_atom.xml")
 
 	if err != nil {
-		t.Error(err)
+		return nil, err
 	}
 
 	var feed NWSAtomFeed
 	xml.Unmarshal(xmlData, &feed)
+
+	return &feed, nil
+}
+
+func TestUnmarshalNWSAtomFeedHasProperValues(t *testing.T) {
+	feed, err := getNwsAtomFeedExample()
+
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	assertEqual(t,
 		feed.ID,
@@ -58,14 +69,11 @@ func TestUnmarshalNWSAtomFeedHasProperValues(t *testing.T) {
 }
 
 func TestUnmarshalNWSAtomFeedEntryHasProperValues(t *testing.T) {
-	xmlData, err := ioutil.ReadFile("examples/nws_atom.xml")
+	feed, err := getNwsAtomFeedExample()
 
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-
-	var feed NWSAtomFeed
-	xml.Unmarshal(xmlData, &feed)
 
 	var entry = feed.Entries[0]
 
@@ -171,14 +179,11 @@ func TestUnmarshalNWSAtomFeedEntryHasProperValues(t *testing.T) {
 }
 
 func TestUnmarshalNWSAtomFeedEntryGeocodeHasProperValues(t *testing.T) {
-	xmlData, err := ioutil.ReadFile("examples/nws_atom.xml")
+	feed, err := getNwsAtomFeedExample()
 
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-
-	var feed NWSAtomFeed
-	xml.Unmarshal(xmlData, &feed)
 
 	var entry = feed.Entries[0]
 	var geocode = entry.Geocode
@@ -205,14 +210,11 @@ func TestUnmarshalNWSAtomFeedEntryGeocodeHasProperValues(t *testing.T) {
 }
 
 func TestUnmarshalNWSAtomFeedEntryParameterHasProperValues(t *testing.T) {
-	xmlData, err := ioutil.ReadFile("examples/nws_atom.xml")
+	feed, err := getNwsAtomFeedExample()
 
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-
-	var feed NWSAtomFeed
-	xml.Unmarshal(xmlData, &feed)
 
 	var entry = feed.Entries[0]
 
@@ -220,4 +222,45 @@ func TestUnmarshalNWSAtomFeedEntryParameterHasProperValues(t *testing.T) {
 		entry.Parameter("VTEC"),
 		"/O.CON.KLZK.FL.W.0108.000000T0000Z-000000T0000Z/\n",
 		"VTEC parameter does not match!")
+}
+
+// Integration test! Requires Internet access!
+func TestGetNwsAtomFeed(t *testing.T) {
+	feed, err := GetNWSAtomFeed()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if feed.ID != "http://alerts.weather.gov/cap/us.atom" {
+		t.Fatal("Feed did not download / parse correctly")
+	}
+}
+
+// Integration test! Requires Internet access!
+func TestGetNwsAtomFeedEntryFromLink(t *testing.T) {
+	feed, err := GetNWSAtomFeed()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(feed.Entries) == 0 {
+		t.Skip("No alert entries in the Atom feed. Skipping...")
+	}
+
+	entry := feed.Entries[0]
+	alert, err := entry.Link[0].FollowAlert()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	entryID, err := url.Parse(entry.ID)
+
+	assertEqual(t,
+		"NOAA-NWS-ALERTS-"+entryID.Query().Get("x"),
+		alert.MessageID,
+		"Entry ID and Message ID do not match!")
+
 }
