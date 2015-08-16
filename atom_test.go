@@ -15,7 +15,11 @@ func getNwsAtomFeedExample() (*NWSAtomFeed, error) {
 	}
 
 	var feed NWSAtomFeed
-	xml.Unmarshal(xmlData, &feed)
+	err = xml.Unmarshal(xmlData, &feed)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return &feed, nil
 }

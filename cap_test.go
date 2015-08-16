@@ -6,15 +6,30 @@ import (
 	"testing"
 )
 
-func TestUnmarshalAlertHasProperValues(t *testing.T) {
+func getCAPAlertExample() (*Alert11, error) {
 	xmlData, err := ioutil.ReadFile("examples/nws_alert.xml")
 
 	if err != nil {
-		t.Error(err)
+		return nil, err
 	}
 
 	var alert Alert11
-	xml.Unmarshal(xmlData, &alert)
+
+	err = xml.Unmarshal(xmlData, &alert)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &alert, nil
+}
+
+func TestUnmarshalAlertHasProperValues(t *testing.T) {
+	alert, err := getCAPAlertExample()
+
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	assertEqual(t,
 		alert.MessageID,
@@ -58,14 +73,11 @@ func TestUnmarshalAlertHasProperValues(t *testing.T) {
 }
 
 func TestUnmarshalAlertInfoHasProperValues(t *testing.T) {
-	xmlData, err := ioutil.ReadFile("examples/nws_alert.xml")
+	alert, err := getCAPAlertExample()
 
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-
-	var alert Alert11
-	xml.Unmarshal(xmlData, &alert)
 
 	var info = alert.Infos[0]
 	assertEqual(t,
@@ -140,14 +152,11 @@ func TestUnmarshalAlertInfoHasProperValues(t *testing.T) {
 }
 
 func TestUnmarshalAlertInfoParameterHasProperValues(t *testing.T) {
-	xmlData, err := ioutil.ReadFile("examples/nws_alert.xml")
+	alert, err := getCAPAlertExample()
 
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-
-	var alert Alert11
-	xml.Unmarshal(xmlData, &alert)
 
 	var info = alert.Infos[0]
 
@@ -183,14 +192,11 @@ func TestUnmarshalAlertInfoParameterHasProperValues(t *testing.T) {
 }
 
 func TestUnmarshalAlertInfoAreaHasProperValues(t *testing.T) {
-	xmlData, err := ioutil.ReadFile("examples/nws_alert.xml")
+	alert, err := getCAPAlertExample()
 
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-
-	var alert Alert11
-	xml.Unmarshal(xmlData, &alert)
 
 	var info = alert.Infos[0]
 	var area = info.Areas[0]
