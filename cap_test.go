@@ -236,3 +236,61 @@ func TestUnmarshalAlertInfoAreaHasProperValues(t *testing.T) {
 		area.GeocodeAll("UGC"),
 		"Value not found in Geocode[UGC]!")
 }
+
+func TestAddParameterToInfoSetsProperValue(t *testing.T) {
+	parameterName := "testcode"
+	parameterValue := "1234"
+	var info Info
+
+	assertEqual(t, len(info.Parameters), 0, "info.Parameters should be empty")
+
+	info.AddParameter(parameterName, parameterValue)
+
+	assertEqual(t, len(info.Parameters), 1, "info.Parameters should have len = 1")
+
+	parameter := info.Parameters[0]
+	assertEqual(t, parameter.ValueName, parameterName, "info.Parameters[0] does not have the correct name")
+	assertEqual(t, parameter.Value, parameterValue, "info.Parameters[0] does not have the correct value")
+}
+
+func TestAddGeocodeToAreaSetsProperValue(t *testing.T) {
+	geocodeName := "testcode"
+	geocodeValue := "1234"
+	var area Area
+
+	assertEqual(t, len(area.Geocodes), 0, "area.Geocodes should be empty")
+
+	area.AddGeocode(geocodeName, geocodeValue)
+
+	assertEqual(t, len(area.Geocodes), 1, "area.Geocodes should have len = 1")
+
+	geocode := area.Geocodes[0]
+	assertEqual(t, geocode.ValueName, geocodeName, "area.Geocodes[0] does not have the correct name")
+	assertEqual(t, geocode.Value, geocodeValue, "area.Geocodes[0] does not have the correct value")
+}
+
+func TestAreaGecodeReturnsFirstValue(t *testing.T) {
+	geocode1 := NamedValue{"test-name", "1234"}
+	geocode2 := NamedValue{"test-name", "5678"}
+
+	var area Area
+
+	area.AddGeocode(geocode1.ValueName, geocode1.Value)
+	area.AddGeocode(geocode2.ValueName, geocode2.Value)
+
+	assertEqual(t, len(area.Geocodes), 2, "area.Geocodes should have len = 2")
+
+	geocodeValue := area.Geocode("test-name")
+	assertEqual(t, geocodeValue, geocode1.Value, "Geocode does not have the correct name")
+}
+
+func TestAreaGecodeReturnsEmptyStringIfNotFound(t *testing.T) {
+	geocode := NamedValue{"test-name", "1234"}
+
+	var area Area
+
+	area.AddGeocode(geocode.ValueName, geocode.Value)
+
+	geocodeValue := area.Geocode("not-a-real-key")
+	assertEqual(t, geocodeValue, "", "Geocode did not return an empty string")
+}
