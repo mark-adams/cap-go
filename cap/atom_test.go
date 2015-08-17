@@ -238,10 +238,10 @@ func TestNWSAtomGeocodeGetValuesReturnsEmptyArrIfNotFound(t *testing.T) {
 	assertEqual(t, len(found), 0, "No items should be found")
 }
 
-func TestLinkFollowReturnsErrorForInvalidURL(t *testing.T) {
+func TestLinkFollowAlertReturnsErrorForInvalidURL(t *testing.T) {
 	link := Link{Href: "abcdef"}
 
-	_, err := link.Follow()
+	_, err := link.FollowAlert()
 
 	assertEqual(t,
 		"Get abcdef: unsupported protocol scheme \"\"",
