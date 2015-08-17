@@ -1,9 +1,7 @@
 package cap
 
 import (
-	"fmt"
 	"io/ioutil"
-	"os"
 	"testing"
 )
 
@@ -310,31 +308,12 @@ func TestParseCAPDateReturnsCorrectValue(t *testing.T) {
 	assertEqual(t, -5, zoneOffsetHours, "TZ offset does not equal expected value")
 }
 
-func TestABC(t *testing.T) {
-	var xmlData = []byte(`<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
-		<alert xmlns='urn:oasis:names:tc:emergency:cap:1.2'>
-		    <identifier>NOAA-NWS-ALERTS-AR1253BA3B00A4.FloodWarning.1253BA3D4A94AR.LZKFLSLZK.342064b5a5aafb8265dfc3707d6a3b09</identifier>
-		    <sender>w-nws.webmaster@noaa.gov</sender>
-		    <sent>2015-08-15T20:45:00-05:00</sent>
-		    <status>Actual</status>
-		    <msgType>Alert</msgType>
-		    <scope>Public</scope>
-		    <info>
-		        <category>Met</category>
-		        <event>Flood Warning</event>
-		        <urgency>Expected</urgency>
-		        <severity>Moderate</severity>
-		        <certainty>Likely</certainty>
-		    </info>
-		</alert>`)
+func TestParseAlertReturnsErrForInvalidXml(t *testing.T) {
+	_, err := ParseAlert([]byte("invalid xml"))
+	assertEqual(t, "EOF", err.Error(), "Unexpected or missing error message")
+}
 
-	alert, err := ParseAlert(xmlData)
-
-	if err != nil {
-		fmt.Errorf(err.Error())
-		os.Exit(1)
-	}
-
-	fmt.Println(alert.MessageID)
-	fmt.Println(alert.Infos[0].EventType)
+func TestParseAlert11ReturnsErrForInvalidXml(t *testing.T) {
+	_, err := ParseAlert11([]byte("invalid xml"))
+	assertEqual(t, "EOF", err.Error(), "Unexpected or missing error message")
 }
