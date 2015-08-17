@@ -10,7 +10,7 @@ import (
 )
 
 func getNwsAtomFeedExample() (*NWSAtomFeed, error) {
-	xmlData, err := ioutil.ReadFile("examples/nws_atom.xml")
+	xmlData, err := ioutil.ReadFile("../examples/nws_atom.xml")
 
 	if err != nil {
 		return nil, err

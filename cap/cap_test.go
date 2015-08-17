@@ -1,27 +1,20 @@
 package cap
 
 import (
-	"encoding/xml"
+	"fmt"
 	"io/ioutil"
+	"os"
 	"testing"
 )
 
 func getCAPAlertExample() (*Alert11, error) {
-	xmlData, err := ioutil.ReadFile("examples/nws_alert.xml")
+	xmlData, err := ioutil.ReadFile("../examples/nws_alert.xml")
 
 	if err != nil {
 		return nil, err
 	}
 
-	var alert Alert11
-
-	err = xml.Unmarshal(xmlData, &alert)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &alert, nil
+	return ParseAlert11(xmlData)
 }
 
 func TestUnmarshalAlertHasProperValues(t *testing.T) {
@@ -293,4 +286,55 @@ func TestAreaGecodeReturnsEmptyStringIfNotFound(t *testing.T) {
 
 	geocodeValue := area.Geocode("not-a-real-key")
 	assertEqual(t, geocodeValue, "", "Geocode did not return an empty string")
+}
+
+func TestParseCAPDateReturnsCorrectValue(t *testing.T) {
+	alert, err := getCAPAlertExample()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	info := alert.Infos[0]
+	dt, _ := ParseCAPDate(info.EffectiveDate)
+	_, zoneOffset := dt.Zone()
+	zoneOffsetHours := zoneOffset / 3600
+
+	// 2015-08-15T20:45:00-05:00
+	assertEqual(t, 2015, int(dt.Year()), "Year does not equal expected value")
+	assertEqual(t, 8, int(dt.Month()), "Month does not equal expected value")
+	assertEqual(t, 15, int(dt.Day()), "Day does not equal expected value")
+	assertEqual(t, 20, int(dt.Hour()), "Hour does not equal expected value")
+	assertEqual(t, 45, int(dt.Minute()), "Minute does not equal expected value")
+	assertEqual(t, 0, int(dt.Second()), "Second does not equal expected value")
+	assertEqual(t, -5, zoneOffsetHours, "TZ offset does not equal expected value")
+}
+
+func TestABC(t *testing.T) {
+	var xmlData = []byte(`<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+		<alert xmlns='urn:oasis:names:tc:emergency:cap:1.2'>
+		    <identifier>NOAA-NWS-ALERTS-AR1253BA3B00A4.FloodWarning.1253BA3D4A94AR.LZKFLSLZK.342064b5a5aafb8265dfc3707d6a3b09</identifier>
+		    <sender>w-nws.webmaster@noaa.gov</sender>
+		    <sent>2015-08-15T20:45:00-05:00</sent>
+		    <status>Actual</status>
+		    <msgType>Alert</msgType>
+		    <scope>Public</scope>
+		    <info>
+		        <category>Met</category>
+		        <event>Flood Warning</event>
+		        <urgency>Expected</urgency>
+		        <severity>Moderate</severity>
+		        <certainty>Likely</certainty>
+		    </info>
+		</alert>`)
+
+	alert, err := ParseAlert(xmlData)
+
+	if err != nil {
+		fmt.Errorf(err.Error())
+		os.Exit(1)
+	}
+
+	fmt.Println(alert.MessageID)
+	fmt.Println(alert.Infos[0].EventType)
 }

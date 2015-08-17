@@ -1,6 +1,9 @@
 package cap
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+	"time"
+)
 
 // Alert provides basic information about the current message: its purpose, its source and its status
 type Alert struct {
@@ -85,6 +88,32 @@ type NamedValue struct {
 	Value     string `xml:"value"`
 }
 
+// ParseAlert parses XML bytes into a CAP 1.2 Alert
+func ParseAlert(xmlData []byte) (*Alert, error) {
+	var alert Alert
+
+	err := xml.Unmarshal(xmlData, &alert)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &alert, nil
+}
+
+// ParseAlert parses XML bytes into a CAP 1.1 Alert
+func ParseAlert11(xmlData []byte) (*Alert11, error) {
+	var alert Alert11
+
+	err := xml.Unmarshal(xmlData, &alert)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &alert, nil
+}
+
 // search checks a slice of NamedValues for the first value with a specific name
 func search(nva *[]NamedValue, name string) string {
 	for _, element := range *nva {
@@ -134,4 +163,12 @@ func (a *Area) GeocodeAll(name string) []string {
 func (a *Area) AddGeocode(name string, value string) {
 	geocode := NamedValue{ValueName: name, Value: value}
 	a.Geocodes = append(a.Geocodes, geocode)
+}
+
+// CAPDate is the form specified by the DateTime Data Type in 3.3.2 of the CAP specificaftion
+const CAPDate string = "2006-01-02T15:04:05-07:00"
+
+// ParseCAPDate parses a string into a CAPDate formatted value
+func ParseCAPDate(dtValue string) (time.Time, error) {
+	return time.Parse(CAPDate, dtValue)
 }
