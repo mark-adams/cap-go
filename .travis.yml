@@ -3,6 +3,7 @@ go:
   - 1.3
   - 1.4
 before_install:
+  - go get github.com/kr/pretty
   - go get github.com/mattn/goveralls
 script:
   - go test ./cap -v -covermode=count -coverprofile=coverage.out
