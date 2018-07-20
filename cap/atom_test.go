@@ -299,8 +299,8 @@ func TestGetNwsAtomFeed(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if feed.ID != "http://alerts.weather.gov/cap/us.atom" {
-		t.Fatal("Feed did not download / parse correctly")
+	if feed.ID != "https://alerts.weather.gov/cap/us.php?x=0" {
+		t.Fatalf("feed.ID is: %s but we expected: %s", feed.ID, "http://alerts.weather.gov/cap/us.atom")
 	}
 }
 
